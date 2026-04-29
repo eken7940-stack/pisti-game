@@ -24,6 +24,7 @@ export const GameBoard: React.FC<Props> = ({ state, onStateChange, onRestart }) 
   const [botThinking, setBotThinking] = useState(false);
   const [countdown, setCountdown] = useState(0);
   const [flyingCard, setFlyingCard] = useState<FlyingCard | null>(null);
+  const [confirmQuit, setConfirmQuit] = useState(false);
   const pendingState = useRef<GameState | null>(null);
   const countdownRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const prevPhase = useRef(state.phase);
@@ -116,6 +117,7 @@ export const GameBoard: React.FC<Props> = ({ state, onStateChange, onRestart }) 
             </div>
           </div>
           <button className="btn-restart" onClick={onRestart}>Tekrar Oyna</button>
+          <button className="btn-quit" onClick={onRestart}>Ana Menü</button>
         </div>
       </div>
     );
@@ -129,6 +131,8 @@ export const GameBoard: React.FC<Props> = ({ state, onStateChange, onRestart }) 
         deckCount={state.deck.length}
         pileCount={state.pile.length}
       />
+      {/* Çıkış butonu */}
+      <button className="quit-btn" onClick={() => setConfirmQuit(true)} title="Ana Menü">✕</button>
 
       {/* Bot eli */}
       <div className="hand hand-bot">
@@ -206,6 +210,21 @@ export const GameBoard: React.FC<Props> = ({ state, onStateChange, onRestart }) 
           );
         })}
       </div>
+
+      {/* Çıkış onay modalı */}
+      {confirmQuit && (
+        <div className="overlay-modal">
+          <div className="modal-box">
+            <div style={{ fontSize: '2.5rem' }}>🚪</div>
+            <h3>Oyundan Çık?</h3>
+            <p>İlerleme kaybolacak.</p>
+            <div style={{ display: 'flex', gap: '1rem', marginTop: '0.5rem' }}>
+              <button className="online-btn online-btn-create" onClick={onRestart}>Çık</button>
+              <button className="online-btn online-btn-join" onClick={() => setConfirmQuit(false)}>Devam Et</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
