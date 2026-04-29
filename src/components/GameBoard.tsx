@@ -201,17 +201,6 @@ export const GameBoard: React.FC<Props> = ({ state, onStateChange, onRestart }) 
 
       {/* Masa */}
       <div className="table-area">
-        {/* Kart geçmişi */}
-        <div className="last-cards">
-          {lastCards.map((c, i) => (
-            <div key={`${c.id}-${i}`} className="last-card-chip">
-              <span style={{ color: ['hearts','diamonds'].includes(c.suit) ? '#dc2626' : '#111' }}>
-                {c.rank}{c.suit === 'hearts' ? '♥' : c.suit === 'diamonds' ? '♦' : c.suit === 'clubs' ? '♣' : '♠'}
-              </span>
-            </div>
-          ))}
-        </div>
-
         <div className="pile-area">
           {state.pile.length === 0 && !flyingCard ? (
             <div className="pile-empty">Masa boş</div>
