@@ -26,6 +26,10 @@ body {
   color: var(--text);
   overflow-x: hidden;
   -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
 }
 
 /* ===== NOISE TEXTURE ===== */
@@ -774,6 +778,8 @@ body::before {
   outline: none;
   transition: border-color 0.15s, box-shadow 0.15s;
   -webkit-appearance: none;
+  user-select: text;
+  -webkit-user-select: text;
 }
 
 .online-input:focus {
@@ -970,6 +976,8 @@ body::before {
   font-family: 'Inter', sans-serif;
   outline: none;
   -webkit-appearance: none;
+  user-select: text;
+  -webkit-user-select: text;
 }
 .chat-input::placeholder { color: rgba(232,232,240,0.18); }
 
