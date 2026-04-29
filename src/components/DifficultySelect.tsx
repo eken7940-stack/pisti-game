@@ -4,6 +4,8 @@ import type { Difficulty } from '../game/types';
 interface Props {
   onSelect: (d: Difficulty) => void;
   onOnline: () => void;
+  onStats: () => void;
+  onlineCount: number;
 }
 
 const options: { value: Difficulty; label: string; desc: string; emoji: string }[] = [
@@ -12,10 +14,17 @@ const options: { value: Difficulty; label: string; desc: string; emoji: string }
   { value: 'hard',   label: 'Zor',    desc: 'Bot optimal oynar',    emoji: '🧠' },
 ];
 
-export const DifficultySelect: React.FC<Props> = ({ onSelect, onOnline }) => (
+export const DifficultySelect: React.FC<Props> = ({ onSelect, onOnline, onStats, onlineCount }) => (
   <div className="menu">
+    {/* Online sayaç */}
+    {onlineCount > 0 && (
+      <div className="online-badge">
+        <span className="online-dot" />
+        {onlineCount} çevrimiçi
+      </div>
+    )}
+
     <div className="menu-title">
-      {/* Meta logo */}
       <div className="title-crowns">
         <span className="meta-logo">∞</span>
       </div>
@@ -28,7 +37,6 @@ export const DifficultySelect: React.FC<Props> = ({ onSelect, onOnline }) => (
     </div>
 
     <div className="menu-modes">
-      {/* Solo mod */}
       <div className="mode-section">
         <p className="mode-label">🤖 Bota Karşı Oyna</p>
         <div className="difficulty-options">
@@ -46,7 +54,6 @@ export const DifficultySelect: React.FC<Props> = ({ onSelect, onOnline }) => (
         </div>
       </div>
 
-      {/* Online mod */}
       <div className="mode-section">
         <p className="mode-label">🌐 Online Oyna</p>
         <button className="online-mode-btn" onClick={onOnline}>
@@ -57,6 +64,10 @@ export const DifficultySelect: React.FC<Props> = ({ onSelect, onOnline }) => (
           </div>
         </button>
       </div>
+
+      <button className="stats-menu-btn" onClick={onStats}>
+        📊 İstatistiklerim
+      </button>
     </div>
   </div>
 );

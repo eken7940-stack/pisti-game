@@ -1235,3 +1235,181 @@ body::before {
   cursor: pointer;
   box-shadow: 0 0 6px rgba(108,99,255,0.6);
 }
+
+/* ===== ONLINE BADGE ===== */
+.online-badge {
+  position: absolute;
+  top: 1rem; right: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.72rem;
+  color: var(--muted);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 4px 10px;
+  backdrop-filter: blur(10px);
+}
+
+.online-dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: #34d399;
+  box-shadow: 0 0 6px #34d399;
+  animation: blink 2s ease-in-out infinite;
+}
+
+/* ===== STATS MENU BUTTON ===== */
+.stats-menu-btn {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 0.75rem 1.4rem;
+  color: var(--muted);
+  font-family: 'Inter', sans-serif;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: color 0.15s, background 0.15s;
+  width: 100%;
+  text-align: center;
+}
+.stats-menu-btn:hover { color: var(--text); background: rgba(255,255,255,0.07); }
+
+/* ===== STATS PANEL ===== */
+.stats-box { max-width: 360px; }
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 0.7rem;
+  width: 100%;
+  margin: 0.5rem 0;
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 0.8rem 0.5rem;
+}
+
+.stat-win  { border-color: rgba(52,211,153,0.3); }
+.stat-loss { border-color: rgba(239,68,68,0.3); }
+.stat-pisti{ border-color: rgba(108,99,255,0.3); }
+
+.stat-val {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 1.4rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, #a78bfa, #6c63ff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.stat-lbl { font-size: 0.62rem; color: var(--muted); letter-spacing: 0.5px; text-align: center; }
+
+/* ===== HAMLE SAYACI ===== */
+.move-timer-bar {
+  position: relative;
+  height: 4px;
+  background: rgba(255,255,255,0.06);
+  border-radius: 4px;
+  overflow: visible;
+  z-index: 1;
+}
+
+.move-timer-fill {
+  height: 100%;
+  border-radius: 4px;
+  box-shadow: 0 0 8px currentColor;
+}
+
+.move-timer-text {
+  position: absolute;
+  right: 0;
+  top: -18px;
+  font-size: 0.7rem;
+  font-family: 'Orbitron', sans-serif;
+  font-weight: 700;
+}
+
+/* ===== KART GEÇMİŞİ ===== */
+.last-cards {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 0.5rem;
+  flex-wrap: wrap;
+  justify-content: center;
+  min-height: 24px;
+}
+
+.last-card-chip {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 2px 7px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  backdrop-filter: blur(10px);
+}
+
+/* ===== EMOJİ REAKSİYONLAR ===== */
+.emoji-reactions {
+  display: flex;
+  justify-content: center;
+  gap: 0.4rem;
+  z-index: 1;
+  position: relative;
+}
+
+.emoji-btn {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  width: 36px; height: 36px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: transform 0.15s cubic-bezier(.34,1.56,.64,1), background 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.emoji-btn:hover  { transform: scale(1.2); background: rgba(255,255,255,0.08); }
+.emoji-btn:active { transform: scale(0.9); }
+
+.emoji-btn-active {
+  background: rgba(108,99,255,0.2) !important;
+  border-color: rgba(108,99,255,0.5) !important;
+  transform: scale(1.25) !important;
+}
+
+/* Floating emoji */
+.floating-reaction {
+  position: fixed;
+  bottom: 180px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 3rem;
+  z-index: 500;
+  pointer-events: none;
+  animation: float-up 1.2s ease-out forwards;
+}
+
+@keyframes float-up {
+  0%   { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
+  100% { opacity: 0; transform: translateX(-50%) translateY(-120px) scale(1.5); }
+}
+
+/* ===== SHARE BUTTON ===== */
+.share-btn {
+  background: rgba(108,99,255,0.1) !important;
+  border-color: rgba(108,99,255,0.3) !important;
+  color: #a78bfa !important;
+}

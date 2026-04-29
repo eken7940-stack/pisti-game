@@ -7,7 +7,7 @@ interface Props {
   onBack: () => void;
 }
 
-type Screen = 'lobby' | 'waiting' | 'joining';
+type Screen = 'lobby' | 'waiting';
 
 export const OnlineRoom: React.FC<Props> = ({ onReady, onBack }) => {
   const [screen, setScreen] = useState<Screen>('lobby');
@@ -16,6 +16,7 @@ export const OnlineRoom: React.FC<Props> = ({ onReady, onBack }) => {
   const [roomId, setRoomId] = useState('');
   const [error, setError] = useState('');
   const [connecting, setConnecting] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   const connect = async () => {
     if (connecting) return;
@@ -24,7 +25,7 @@ export const OnlineRoom: React.FC<Props> = ({ onReady, onBack }) => {
     try {
       await socket.connect(getSocketUrl());
     } catch {
-      setError('Sunucuya bağlanılamadı. Server çalışıyor mu?');
+      setError('Sunucuya bağlanılamadı.');
       setConnecting(false);
       return;
     }
@@ -63,6 +64,28 @@ export const OnlineRoom: React.FC<Props> = ({ onReady, onBack }) => {
     });
 
     socket.send({ type: 'JOIN_ROOM', roomId: roomInput.trim(), name: myName });
+  };
+
+  // URL'den oda kodu al
+  React.useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const code = params.get('room');
+    if (code) setRoomInput(code.toUpperCase());
+  }, []);
+
+  const shareLink = () => {
+    const url = `${window.location.origin}?room=${roomId}`;
+    navigator.clipboard.writeText(url).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  };
+
+  const copyCode = () => {
+    navigator.clipboard.writeText(roomId).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
   };
 
   return (
@@ -120,14 +143,16 @@ export const OnlineRoom: React.FC<Props> = ({ onReady, onBack }) => {
           <div className="room-code-box">
             <span className="room-code-label">Oda Kodu</span>
             <span className="room-code">{roomId}</span>
-            <button
-              className="copy-btn"
-              onClick={() => navigator.clipboard.writeText(roomId)}
-            >
-              📋 Kopyala
-            </button>
+            <div style={{ display: 'flex', gap: '0.5rem' }}>
+              <button className="copy-btn" onClick={copyCode}>
+                {copied ? '✓ Kopyalandı' : '📋 Kodu Kopyala'}
+              </button>
+              <button className="copy-btn share-btn" onClick={shareLink}>
+                🔗 Link Paylaş
+              </button>
+            </div>
           </div>
-          <p className="waiting-hint">Bu kodu arkadaşına gönder</p>
+          <p className="waiting-hint">Kodu veya linki arkadaşına gönder</p>
         </div>
       )}
     </div>

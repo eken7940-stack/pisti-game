@@ -60,6 +60,14 @@ wss.on('connection', (ws) => {
   ws.roomId = null;
   ws.playerIndex = null;
 
+  // Online sayacı güncelle
+  const onlineCount = wss.clients.size;
+  wss.clients.forEach(client => {
+    if (client.readyState === 1) {
+      client.send(JSON.stringify({ type: 'ONLINE_COUNT', count: onlineCount }));
+    }
+  });
+
   ws.on('message', (raw) => {
     let msg;
     try { msg = JSON.parse(raw); } catch { return; }
@@ -133,6 +141,14 @@ wss.on('connection', (ws) => {
   });
 
   ws.on('close', () => {
+    // Online sayacı güncelle
+    setTimeout(() => {
+      const count = wss.clients.size;
+      wss.clients.forEach(client => {
+        if (client.readyState === 1) client.send(JSON.stringify({ type: 'ONLINE_COUNT', count }));
+      });
+    }, 100);
+
     if (!ws.roomId) return;
     const room = rooms.get(ws.roomId);
     if (!room) return;

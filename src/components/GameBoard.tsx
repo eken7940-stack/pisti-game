@@ -5,6 +5,8 @@ import { botMove } from '../game/bot';
 import { CardComponent } from './Card';
 import { ScoreBoard } from './ScoreBoard';
 import { SFX } from '../game/audio';
+import { Confetti } from './Confetti';
+import { updateStats } from '../game/stats';
 
 interface Props {
   state: GameState;
@@ -12,31 +14,78 @@ interface Props {
   onRestart: () => void;
 }
 
-interface FlyingCard {
-  card: Card;
-  from: 'player' | 'bot';
-  id: number;
-}
+interface FlyingCard { card: Card; from: 'player' | 'bot'; id: number; }
 
+const EMOJIS = ['👏','🔥','😂','😤','🎉','💀'];
+const MOVE_TIME = 20; // saniye
 let flyId = 0;
+
+function vibrate(ms: number | number[]) {
+  try { navigator.vibrate?.(ms as number); } catch { /* ignore */ }
+}
 
 export const GameBoard: React.FC<Props> = ({ state, onStateChange, onRestart }) => {
   const [botThinking, setBotThinking] = useState(false);
   const [countdown, setCountdown] = useState(0);
   const [flyingCard, setFlyingCard] = useState<FlyingCard | null>(null);
   const [confirmQuit, setConfirmQuit] = useState(false);
+  const [showConfetti, setShowConfetti] = useState(false);
+  const [moveTimer, setMoveTimer] = useState(MOVE_TIME);
+  const [lastCards, setLastCards] = useState<Card[]>([]);
+  const [reaction, setReaction] = useState<string | null>(null);
+  const [floatingReaction, setFloatingReaction] = useState<{ emoji: string; id: number } | null>(null);
+
   const pendingState = useRef<GameState | null>(null);
   const countdownRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const moveTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const prevPhase = useRef(state.phase);
+  const statsUpdated = useRef(false);
 
-  // Oyun bitince ses
+  // Oyun bitince istatistik + konfeti
   useEffect(() => {
-    if (state.phase === 'gameover' && prevPhase.current === 'playing') {
+    if (state.phase === 'gameover' && prevPhase.current === 'playing' && !statsUpdated.current) {
+      statsUpdated.current = true;
       const playerWon = state.player.score > state.bot.score;
-      setTimeout(() => playerWon ? SFX.win() : SFX.lose(), 300);
+      const tie = state.player.score === state.bot.score;
+      const result = tie ? 'draw' : playerWon ? 'win' : 'loss';
+      updateStats(result, state.player.pistiCount);
+      if (playerWon) {
+        setShowConfetti(true);
+        SFX.win();
+        vibrate(200);
+        setTimeout(() => setShowConfetti(false), 4000);
+      } else if (!tie) {
+        SFX.lose();
+        vibrate([100, 50, 100]);
+      }
     }
     prevPhase.current = state.phase;
   }, [state.phase]);
+
+  // Oyuncu hamle sayacı
+  useEffect(() => {
+    if (state.currentTurn === 'player' && state.phase === 'playing' && !flyingCard) {
+      setMoveTimer(MOVE_TIME);
+      clearInterval(moveTimerRef.current!);
+      moveTimerRef.current = setInterval(() => {
+        setMoveTimer(prev => {
+          if (prev <= 1) {
+            clearInterval(moveTimerRef.current!);
+            // Süre dolunca rastgele kart at
+            if (state.player.hand.length > 0) {
+              const randomCard = state.player.hand[Math.floor(Math.random() * state.player.hand.length)];
+              handlePlayerCard(randomCard);
+            }
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+    } else {
+      clearInterval(moveTimerRef.current!);
+    }
+    return () => clearInterval(moveTimerRef.current!);
+  }, [state.currentTurn, state.phase, flyingCard]);
 
   // Bot hamlesi
   useEffect(() => {
@@ -44,7 +93,6 @@ export const GameBoard: React.FC<Props> = ({ state, onStateChange, onRestart }) 
       setBotThinking(true);
       const delay = 4000;
       setCountdown(4);
-
       countdownRef.current = setInterval(() => {
         setCountdown(prev => (prev <= 1 ? 0 : prev - 1));
       }, 1000);
@@ -53,23 +101,17 @@ export const GameBoard: React.FC<Props> = ({ state, onStateChange, onRestart }) 
         clearInterval(countdownRef.current!);
         setCountdown(0);
         setBotThinking(false);
-
         const card = botMove(state);
         const next = playCard(state, card, 'bot');
         pendingState.current = next;
-
-        // Ses
         if (next.message.includes('pişti')) SFX.botPisti();
-        else if (next.pile.length === 0) SFX.cardCapture();
+        else if (next.pile.length === 0) { SFX.cardCapture(); vibrate(80); }
         else SFX.cardPlay();
-
+        setLastCards(prev => [card, ...prev].slice(0, 5));
         setFlyingCard({ card, from: 'bot', id: ++flyId });
       }, delay);
 
-      return () => {
-        clearTimeout(timer);
-        clearInterval(countdownRef.current!);
-      };
+      return () => { clearTimeout(timer); clearInterval(countdownRef.current!); };
     }
   }, [state.currentTurn, state.phase]);
 
@@ -83,56 +125,64 @@ export const GameBoard: React.FC<Props> = ({ state, onStateChange, onRestart }) 
 
   const handlePlayerCard = (card: Card) => {
     if (state.currentTurn !== 'player' || state.phase !== 'playing' || botThinking || flyingCard) return;
+    clearInterval(moveTimerRef.current!);
     const next = playCard(state, card, 'player');
     pendingState.current = next;
-
-    // Ses
-    if (next.message.includes('Pişti')) SFX.pisti();
-    else if (next.pile.length === 0) SFX.cardCapture();
-    else SFX.cardPlay();
-
+    if (next.message.includes('Pişti')) { SFX.pisti(); vibrate([50, 30, 100]); }
+    else if (next.pile.length === 0) { SFX.cardCapture(); vibrate(80); }
+    else { SFX.cardPlay(); vibrate(30); }
+    setLastCards(prev => [card, ...prev].slice(0, 5));
     setFlyingCard({ card, from: 'player', id: ++flyId });
   };
 
+  const sendReaction = (emoji: string) => {
+    setReaction(emoji);
+    setFloatingReaction({ emoji, id: Date.now() });
+    vibrate(40);
+    setTimeout(() => setReaction(null), 2000);
+    setTimeout(() => setFloatingReaction(null), 1200);
+  };
+
   const topPile = state.pile[state.pile.length - 1];
+  const timerPct = (moveTimer / MOVE_TIME) * 100;
+  const timerColor = moveTimer <= 5 ? '#ef4444' : moveTimer <= 10 ? '#f59e0b' : '#6c63ff';
 
   if (state.phase === 'gameover') {
     const playerWon = state.player.score > state.bot.score;
     const tie = state.player.score === state.bot.score;
     return (
-      <div className="gameover">
-        <div className="gameover-card">
-          <div className="gameover-emoji">{tie ? '🤝' : playerWon ? '🏆' : '😔'}</div>
-          <h2>{tie ? 'Berabere!' : playerWon ? 'Kazandın!' : 'Kaybettin!'}</h2>
-          <div className="gameover-scores">
-            <div className={`go-score ${playerWon ? 'go-winner' : ''}`}>
-              <span>Sen</span>
-              <strong>{state.player.score}</strong>
-              <small>{state.player.pistiCount} pişti</small>
+      <>
+        {showConfetti && <Confetti />}
+        <div className="gameover">
+          <div className="gameover-card">
+            <div className="gameover-emoji">{tie ? '🤝' : playerWon ? '🏆' : '😔'}</div>
+            <h2>{tie ? 'Berabere!' : playerWon ? 'Kazandın!' : 'Kaybettin!'}</h2>
+            <div className="gameover-scores">
+              <div className={`go-score ${playerWon ? 'go-winner' : ''}`}>
+                <span>Sen</span>
+                <strong>{state.player.score}</strong>
+                <small>{state.player.pistiCount} pişti</small>
+              </div>
+              <div className={`go-score ${!playerWon && !tie ? 'go-winner' : ''}`}>
+                <span>Bot</span>
+                <strong>{state.bot.score}</strong>
+                <small>{state.bot.pistiCount} pişti</small>
+              </div>
             </div>
-            <div className={`go-score ${!playerWon && !tie ? 'go-winner' : ''}`}>
-              <span>Bot</span>
-              <strong>{state.bot.score}</strong>
-              <small>{state.bot.pistiCount} pişti</small>
-            </div>
+            <button className="btn-restart" onClick={onRestart}>Tekrar Oyna</button>
+            <button className="btn-quit" onClick={onRestart}>Ana Menü</button>
           </div>
-          <button className="btn-restart" onClick={onRestart}>Tekrar Oyna</button>
-          <button className="btn-quit" onClick={onRestart}>Ana Menü</button>
         </div>
-      </div>
+      </>
     );
   }
 
   return (
     <div className="gameboard">
-      <ScoreBoard
-        player={state.player}
-        bot={state.bot}
-        deckCount={state.deck.length}
-        pileCount={state.pile.length}
-      />
-      {/* Çıkış butonu */}
-      <button className="quit-btn" onClick={() => setConfirmQuit(true)} title="Ana Menü">✕</button>
+      {showConfetti && <Confetti />}
+
+      <ScoreBoard player={state.player} bot={state.bot} deckCount={state.deck.length} pileCount={state.pile.length} />
+      <button className="quit-btn" onClick={() => setConfirmQuit(true)} title="Çık">✕</button>
 
       {/* Bot eli */}
       <div className="hand hand-bot">
@@ -151,20 +201,27 @@ export const GameBoard: React.FC<Props> = ({ state, onStateChange, onRestart }) 
 
       {/* Masa */}
       <div className="table-area">
+        {/* Kart geçmişi */}
+        <div className="last-cards">
+          {lastCards.map((c, i) => (
+            <div key={`${c.id}-${i}`} className="last-card-chip">
+              <span style={{ color: ['hearts','diamonds'].includes(c.suit) ? '#dc2626' : '#111' }}>
+                {c.rank}{c.suit === 'hearts' ? '♥' : c.suit === 'diamonds' ? '♦' : c.suit === 'clubs' ? '♣' : '♠'}
+              </span>
+            </div>
+          ))}
+        </div>
+
         <div className="pile-area">
           {state.pile.length === 0 && !flyingCard ? (
             <div className="pile-empty">Masa boş</div>
           ) : (
             <div className="pile-stack">
               {state.pile.slice(-4).map((c, i, arr) => (
-                <div
-                  key={c.id}
-                  style={{
-                    position: 'absolute',
-                    top: i * 3, left: i * 3, zIndex: i,
-                    transform: `rotate(${(i - arr.length / 2) * 3}deg)`,
-                  }}
-                >
+                <div key={c.id} style={{
+                  position: 'absolute', top: i * 3, left: i * 3, zIndex: i,
+                  transform: `rotate(${(i - arr.length / 2) * 3}deg)`,
+                }}>
                   <CardComponent card={c} faceDown={i < arr.length - 1} />
                 </div>
               ))}
@@ -176,21 +233,46 @@ export const GameBoard: React.FC<Props> = ({ state, onStateChange, onRestart }) 
 
       {/* Uçan kart */}
       {flyingCard && (
-        <div
-          key={flyingCard.id}
-          className={`flying-card flying-from-${flyingCard.from}`}
-          onAnimationEnd={handleAnimEnd}
-        >
+        <div key={flyingCard.id} className={`flying-card flying-from-${flyingCard.from}`} onAnimationEnd={handleAnimEnd}>
           <CardComponent card={flyingCard.card} />
         </div>
       )}
 
-      {/* Mesaj */}
+      {/* Floating emoji reaksiyon */}
+      {floatingReaction && (
+        <div key={floatingReaction.id} className="floating-reaction">{floatingReaction.emoji}</div>
+      )}
+
+      {/* Mesaj + hamle sayacı */}
       <div className="message-bar">
         <span>{state.message}</span>
         {state.currentTurn === 'player' && state.phase === 'playing' && !flyingCard && (
           <span className="turn-indicator"> — Senin sıran</span>
         )}
+      </div>
+
+      {/* Hamle sayacı */}
+      {state.currentTurn === 'player' && state.phase === 'playing' && !flyingCard && (
+        <div className="move-timer-bar">
+          <div
+            className="move-timer-fill"
+            style={{ width: `${timerPct}%`, background: timerColor, transition: 'width 1s linear, background 0.3s' }}
+          />
+          <span className="move-timer-text" style={{ color: timerColor }}>{moveTimer}s</span>
+        </div>
+      )}
+
+      {/* Emoji reaksiyonlar */}
+      <div className="emoji-reactions">
+        {EMOJIS.map(e => (
+          <button
+            key={e}
+            className={`emoji-btn ${reaction === e ? 'emoji-btn-active' : ''}`}
+            onClick={() => sendReaction(e)}
+          >
+            {e}
+          </button>
+        ))}
       </div>
 
       {/* Oyuncu eli */}
@@ -211,7 +293,7 @@ export const GameBoard: React.FC<Props> = ({ state, onStateChange, onRestart }) 
         })}
       </div>
 
-      {/* Çıkış onay modalı */}
+      {/* Çıkış onay */}
       {confirmQuit && (
         <div className="overlay-modal">
           <div className="modal-box">
