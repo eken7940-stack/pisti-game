@@ -21,11 +21,11 @@ export const DifficultySelect: React.FC<Props> = ({ onSelect, onOnline }) => (
         <span className="crown-right">♚</span>
       </div>
       <h1 className="game-title">
-        <span className="title-berra">BERRA</span>
-        <span className="title-amp"> &amp; </span>
-        <span className="title-pasa">PAŞA</span>
+        <span className="title-berra">Otuz1</span>
+        <span className="title-amp"> </span>
+        <span className="title-pasa">Pişti Salonu</span>
       </h1>
-      <p className="menu-subtitle">Pişti Kartı Oyunu</p>
+      <p className="menu-subtitle">Türk Kart Oyunu</p>
     </div>
 
     <div className="menu-modes">

@@ -8,12 +8,11 @@ interface Station {
 }
 
 const STATIONS: Station[] = [
-  { name: 'Polis Radyosu',  url: 'https://www.broadcastify.com/listen/feed/30115',           genre: '🚨 Polis',  emoji: '🚔' },
-  { name: 'Scanner Radio',  url: 'https://audio.broadcastify.com/9999-1000-1000-1000-1000',  genre: '🚨 Polis',  emoji: '🚨' },
-  { name: 'Jazz FM',        url: 'https://stream.jazz.fm/jazz128',                           genre: 'Jazz',      emoji: '🎷' },
-  { name: 'Lofi Hip Hop',   url: 'https://streams.ilovemusic.de/iloveradio17.mp3',            genre: 'Lofi',      emoji: '🎧' },
-  { name: 'Classical',      url: 'https://live.musopen.org:8085/streamvbr0',                  genre: 'Klasik',    emoji: '🎻' },
-  { name: 'Casino Vibes',   url: 'https://streams.ilovemusic.de/iloveradio2.mp3',             genre: 'Pop',       emoji: '🎰' },
+  { name: 'Polis Radyosu',  url: 'https://m.egm.gov.tr:8093/stream?/;stream.mp3', genre: '🚨 Polis',  emoji: '🚔' },
+  { name: 'Jazz FM',        url: 'https://stream.jazz.fm/jazz128',                 genre: 'Jazz',      emoji: '🎷' },
+  { name: 'Lofi Hip Hop',   url: 'https://streams.ilovemusic.de/iloveradio17.mp3', genre: 'Lofi',      emoji: '🎧' },
+  { name: 'Classical',      url: 'https://live.musopen.org:8085/streamvbr0',        genre: 'Klasik',    emoji: '🎻' },
+  { name: 'Casino Vibes',   url: 'https://streams.ilovemusic.de/iloveradio2.mp3',  genre: 'Pop',       emoji: '🎰' },
 ];
 
 export const Radio: React.FC = () => {
