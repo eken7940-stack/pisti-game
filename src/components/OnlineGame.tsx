@@ -5,6 +5,7 @@ import { playCard } from '../game/gameLogic';
 import { CardComponent } from './Card';
 import { socket } from '../game/socket';
 import { SFX } from '../game/audio';
+import { ChatBox } from './ChatBox';
 
 interface Props {
   playerIndex: number;   // 0 = host (Berra), 1 = guest (Paşa)
@@ -25,7 +26,6 @@ export const OnlineGame: React.FC<Props> = ({ playerIndex, myName, opponentName,
   const [ready, setReady] = useState(isHost);
   const [flyingCard, setFlyingCard] = useState<FlyingCard | null>(null);
   const [chat, setChat] = useState<{ from: string; text: string }[]>([]);
-  const [chatInput, setChatInput] = useState('');
   const [opponentLeft, setOpponentLeft] = useState(false);
   const [rematchPending, setRematchPending] = useState(false);
   const pendingState = useRef<GameState | null>(null);
@@ -136,13 +136,6 @@ export const OnlineGame: React.FC<Props> = ({ playerIndex, myName, opponentName,
     return () => socket.off('OPPONENT_PLAYED', onOpponentCard);
   }, [isHost, gameState]);
 
-  const sendChat = () => {
-    if (!chatInput.trim()) return;
-    socket.send({ type: 'CHAT', text: chatInput });
-    setChat(prev => [...prev.slice(-19), { from: myName, text: chatInput }]);
-    setChatInput('');
-  };
-
   if (!ready) {
     return (
       <div className="online-loading">
@@ -249,26 +242,10 @@ export const OnlineGame: React.FC<Props> = ({ playerIndex, myName, opponentName,
       </div>
 
       {/* Chat */}
-      <div className="online-chat">
-        <div className="chat-messages">
-          {chat.map((m, i) => (
-            <div key={i} className={`chat-msg ${m.from === myName ? 'chat-mine' : 'chat-theirs'}`}>
-              <span className="chat-from">{m.from}:</span> {m.text}
-            </div>
-          ))}
-        </div>
-        <div className="chat-input-row">
-          <input
-            className="chat-input"
-            placeholder="Mesaj..."
-            value={chatInput}
-            onChange={e => setChatInput(e.target.value)}
-            onKeyDown={e => e.key === 'Enter' && sendChat()}
-            maxLength={60}
-          />
-          <button className="chat-send" onClick={sendChat}>➤</button>
-        </div>
-      </div>
+      <ChatBox myName={myName} opponentName={opponentName} chat={chat} onSend={(text) => {
+        socket.send({ type: 'CHAT', text });
+        setChat(prev => [...prev.slice(-19), { from: myName, text }]);
+      }} />
 
       {/* Rakip ayrıldı */}
       {opponentLeft && (
