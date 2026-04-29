@@ -91,8 +91,8 @@ export const GameBoard: React.FC<Props> = ({ state, onStateChange, onRestart }) 
   useEffect(() => {
     if (state.currentTurn === 'bot' && state.phase === 'playing' && !botThinking) {
       setBotThinking(true);
-      const delay = 4000;
-      setCountdown(4);
+      const delay = 3000;
+      setCountdown(3);
       countdownRef.current = setInterval(() => {
         setCountdown(prev => (prev <= 1 ? 0 : prev - 1));
       }, 1000);
