@@ -31,7 +31,6 @@ export const GameBoard: React.FC<Props> = ({ state, onStateChange, onRestart }) 
   const [confirmQuit, setConfirmQuit] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
   const [moveTimer, setMoveTimer] = useState(MOVE_TIME);
-  const [lastCards, setLastCards] = useState<Card[]>([]);
   const [reaction, setReaction] = useState<string | null>(null);
   const [floatingReaction, setFloatingReaction] = useState<{ emoji: string; id: number } | null>(null);
 
@@ -107,7 +106,6 @@ export const GameBoard: React.FC<Props> = ({ state, onStateChange, onRestart }) 
         if (next.message.includes('pişti')) SFX.botPisti();
         else if (next.pile.length === 0) { SFX.cardCapture(); vibrate(80); }
         else SFX.cardPlay();
-        setLastCards(prev => [card, ...prev].slice(0, 5));
         setFlyingCard({ card, from: 'bot', id: ++flyId });
       }, delay);
 
@@ -131,7 +129,6 @@ export const GameBoard: React.FC<Props> = ({ state, onStateChange, onRestart }) 
     if (next.message.includes('Pişti')) { SFX.pisti(); vibrate([50, 30, 100]); }
     else if (next.pile.length === 0) { SFX.cardCapture(); vibrate(80); }
     else { SFX.cardPlay(); vibrate(30); }
-    setLastCards(prev => [card, ...prev].slice(0, 5));
     setFlyingCard({ card, from: 'player', id: ++flyId });
   };
 
