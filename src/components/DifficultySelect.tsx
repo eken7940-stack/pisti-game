@@ -15,13 +15,12 @@ const options: { value: Difficulty; label: string; desc: string; emoji: string }
 export const DifficultySelect: React.FC<Props> = ({ onSelect, onOnline }) => (
   <div className="menu">
     <div className="menu-title">
-      {/* Taç efekti */}
+      {/* Meta logo */}
       <div className="title-crowns">
-        <span className="crown-left">♛</span>
-        <span className="crown-right">♚</span>
+        <span className="meta-logo">∞</span>
       </div>
       <h1 className="game-title">
-        <span className="title-berra">Otuz1</span>
+        <span className="title-meta">Meta</span>
         <span className="title-amp"> </span>
         <span className="title-pasa">Pişti Salonu</span>
       </h1>

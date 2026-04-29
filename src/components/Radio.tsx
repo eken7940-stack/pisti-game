@@ -5,14 +5,34 @@ interface Station {
   url: string;
   genre: string;
   emoji: string;
+  logo?: string;
 }
 
 const STATIONS: Station[] = [
-  { name: 'Polis Radyosu',  url: 'https://m.egm.gov.tr:8093/stream?/;stream.mp3', genre: '🚨 Polis',  emoji: '🚔' },
-  { name: 'Jazz FM',        url: 'https://stream.jazz.fm/jazz128',                 genre: 'Jazz',      emoji: '🎷' },
-  { name: 'Lofi Hip Hop',   url: 'https://streams.ilovemusic.de/iloveradio17.mp3', genre: 'Lofi',      emoji: '🎧' },
-  { name: 'Classical',      url: 'https://live.musopen.org:8085/streamvbr0',        genre: 'Klasik',    emoji: '🎻' },
-  { name: 'Casino Vibes',   url: 'https://streams.ilovemusic.de/iloveradio2.mp3',  genre: 'Pop',       emoji: '🎰' },
+  {
+    name: 'Polis Radyosu',
+    url: 'https://m.egm.gov.tr:8093/stream?/;stream.mp3',
+    genre: 'Polis',
+    emoji: '🚔',
+    logo: 'https://yt3.googleusercontent.com/B-o41U7LQULCf3TlBjmAmhIsPglR7hlGmbzn_wLLQbe1CGhP0b9cmr1xVp7lTv7nkuDFRfhIsg=s900-c-k-c0x00ffffff-no-rj',
+  },
+  {
+    name: 'Slow 7',
+    url: 'https://moondigitaledge2.radyotvonline.net/radyo7slow/playlist.m3u8',
+    genre: 'Slow',
+    emoji: '🎵',
+    logo: 'https://www.canliradyodinle.fm/wp-content/uploads/slow-7.jpg',
+  },
+  {
+    name: 'Slow Türk',
+    url: 'https://radyo.duhnet.tv/slowturk?/;stream.mp3',
+    genre: 'Slow',
+    emoji: '🎶',
+    logo: 'https://www.canliradyodinle.fm/wp-content/uploads/slow-turk-dinle.jpg',
+  },
+  { name: 'Jazz FM',      url: 'https://stream.jazz.fm/jazz128',                 genre: 'Jazz',   emoji: '🎷' },
+  { name: 'Lofi',         url: 'https://streams.ilovemusic.de/iloveradio17.mp3', genre: 'Lofi',   emoji: '🎧' },
+  { name: 'Casino Vibes', url: 'https://streams.ilovemusic.de/iloveradio2.mp3',  genre: 'Pop',    emoji: '🎰' },
 ];
 
 export const Radio: React.FC = () => {
@@ -80,7 +100,10 @@ export const Radio: React.FC = () => {
           <div className="radio-now">
             {current ? (
               <>
-                <span className="radio-now-emoji">{current.emoji}</span>
+                {current.logo
+                  ? <img src={current.logo} alt={current.name} className="radio-now-logo" />
+                  : <span className="radio-now-emoji">{current.emoji}</span>
+                }
                 <div className="radio-now-info">
                   <span className="radio-now-name">{current.name}</span>
                   <span className="radio-now-genre">{current.genre}</span>
@@ -104,7 +127,10 @@ export const Radio: React.FC = () => {
                 className={`radio-station ${current?.name === s.name ? 'radio-station-active' : ''}`}
                 onClick={() => play(s)}
               >
-                <span>{s.emoji}</span>
+                {s.logo
+                  ? <img src={s.logo} alt={s.name} className="radio-station-logo" />
+                  : <span>{s.emoji}</span>
+                }
                 <div className="radio-station-info">
                   <span className="radio-station-name">{s.name}</span>
                   <span className="radio-station-genre">{s.genre}</span>

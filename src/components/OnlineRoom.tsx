@@ -70,11 +70,10 @@ export const OnlineRoom: React.FC<Props> = ({ onReady, onBack }) => {
       <button className="back-btn" onClick={onBack}>← Geri</button>
 
       <div className="online-title">
-        <span className="crown-pink">👑</span>
-        <span className="online-title-berra">Otuz1</span>
+        <span className="meta-logo-sm">∞</span>
+        <span className="online-title-berra">Meta</span>
         <span className="online-title-amp"> </span>
         <span className="online-title-pasa">Pişti Salonu</span>
-        <span className="crown-gold">👑</span>
       </div>
       <p className="online-subtitle">Online 2 Kişilik</p>
 
